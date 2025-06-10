@@ -37,11 +37,14 @@ const App = () => {
       });
       const data = await response.json();
       if (response.ok) {
+        console.log('Fetched all tourism data:', data.length, 'items'); // Debug log
         setAllTourismData(data);
+        return data; // Return the data for immediate use
       }
     } catch (err) {
       console.error('Error fetching all tourism data:', err);
     }
+    return [];
   };
 
   // Fetch provinces
@@ -106,31 +109,88 @@ const App = () => {
     }
   };
 
+  // Enhanced search function that works across all loaded data
+  const searchAllTourismData = (searchTerm, dataToSearch = null) => {
+    console.log('Searching for:', searchTerm); // Debug log
+    
+    if (!searchTerm.trim()) {
+      setSearchResults([]);
+      setShowSearchResults(false);
+      return;
+    }
+
+    const lowerSearchTerm = searchTerm.toLowerCase();
+
+    // Use provided data or fall back to existing data
+    let allDataToSearch = dataToSearch || [...allTourismData];
+    
+    // Also include current tourism data if available
+    if (tourismData.length > 0) {
+      allDataToSearch = [...allDataToSearch, ...tourismData];
+    }
+
+    console.log('Data to search:', allDataToSearch.length, 'items'); // Debug log
+
+    // Remove duplicates based on id
+    const uniqueData = allDataToSearch.filter(
+      (item, index, self) => index === self.findIndex((t) => t.id === item.id)
+    );
+
+    console.log('Unique data:', uniqueData.length, 'items'); // Debug log
+
+    // Search only in wisata names (remove alamat, region, and province search)
+    const results = uniqueData.filter((place) => {
+      return place.nama.toLowerCase().includes(lowerSearchTerm);
+    });
+
+    console.log('Search results:', results.length, 'items'); // Debug log
+    setSearchResults(results);
+    setShowSearchResults(results.length > 0 || searchTerm.length > 0);
+    return results;
+  };
+
   // Create new tourism destination
   const createTourismDestination = async (formData) => {
     setLoading(true);
-    setError(null);
     try {
       const response = await fetch(`${BASE_URL}/wisatas`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${API_TOKEN}`,
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${API_TOKEN}`,
           Accept: 'application/json',
         },
         body: JSON.stringify(formData),
       });
-      const data = await response.json();
+      const responseData = await response.json();
       if (response.ok) {
+        console.log('New tourism data created:', responseData); // Debug log
+        
         setCurrentView('main');
         setError(null);
+        
+        // Fetch fresh data immediately
+        const freshAllData = await fetchAllTourismData();
+        
+        // Clear and reset search results
+        setSearchResults([]);
+        setShowSearchResults(false);
+        
         // Refresh data if user has selected a region
         if (selectedDaerah) {
-          fetchTourismData(selectedDaerah);
+          await fetchTourismData(selectedDaerah);
         }
-        await fetchAllTourismData(); // Refresh all data for delete view
+        
+        // If there's an active search term, re-run the search with fresh data
+        if (searchTerm) {
+          console.log('Re-running search with fresh data for term:', searchTerm); // Debug log
+          // Use the fresh data directly instead of waiting for state update
+          setTimeout(() => {
+            searchAllTourismData(searchTerm, freshAllData);
+          }, 200);
+        }
       } else {
-        setError(data.message || 'Gagal menambahkan destinasi wisata.');
+        setError(responseData.message || 'Gagal menambahkan destinasi wisata.');
       }
     } catch (err) {
       setError('Gagal menambahkan destinasi wisata: ' + err.message);
@@ -155,11 +215,24 @@ const App = () => {
         },
       });
       if (response.ok) {
-        await fetchAllTourismData();
+        // Fetch fresh data immediately
+        const freshAllData = await fetchAllTourismData();
         setError(null);
+        
+        // Clear search results to force fresh search
+        setSearchResults([]);
+        setShowSearchResults(false);
+        
         // Refresh current view data if needed
         if (selectedDaerah) {
-          fetchTourismData(selectedDaerah);
+          await fetchTourismData(selectedDaerah);
+        }
+        
+        // If there's an active search term, re-run the search with fresh data
+        if (searchTerm) {
+          setTimeout(() => {
+            searchAllTourismData(searchTerm, freshAllData);
+          }, 200);
         }
       } else {
         setError('Gagal menghapus destinasi wisata.');
@@ -203,54 +276,6 @@ const App = () => {
     fetchAllTourismData();
   }, []);
 
-  // Enhanced search function that works across all loaded data
-  const searchAllTourismData = (searchTerm) => {
-    if (!searchTerm.trim()) {
-      setSearchResults([]);
-      setShowSearchResults(false);
-      return;
-    }
-
-    const lowerSearchTerm = searchTerm.toLowerCase();
-
-    // Search in current tourismData if available
-    let allDataToSearch = [...tourismData];
-
-    // If we have allTourismData from previous loads, include it
-    if (allTourismData.length > 0) {
-      allDataToSearch = [...allTourismData];
-    }
-
-    // Remove duplicates based on id
-    const uniqueData = allDataToSearch.filter(
-      (item, index, self) => index === self.findIndex((t) => t.id === item.id)
-    );
-
-    const results = uniqueData.filter((place) => {
-      // Search in tourism destination name and address
-      const matchesTourismData =
-        place.nama.toLowerCase().includes(lowerSearchTerm) ||
-        place.alamat.toLowerCase().includes(lowerSearchTerm);
-
-      // Search in region/city name
-      const region = regions.find((r) => r.id === place.id_daerah);
-      const matchesRegion =
-        region && region.nama_daerah.toLowerCase().includes(lowerSearchTerm);
-
-      // Search in province name
-      const province =
-        region && provinces.find((p) => p.id === region.id_provinsi);
-      const matchesProvince =
-        province &&
-        province.nama_provinsi.toLowerCase().includes(lowerSearchTerm);
-
-      return matchesTourismData || matchesRegion || matchesProvince;
-    });
-
-    setSearchResults(results);
-    setShowSearchResults(results.length > 0);
-  };
-
   // Handle search input change
   const handleSearchChange = (e) => {
     const value = e.target.value;
@@ -276,14 +301,19 @@ const App = () => {
     setSearchResults([]);
   };
 
-  // Load more data for search by fetching from different regions
+  // Load more data for search by fetching from different regions - IMPROVED VERSION
   const loadMoreDataForSearch = async () => {
     try {
-      const allTourismPlaces = [];
+      // First try to get all data from the main endpoint
+      const allData = await fetchAllTourismData();
+      if (allData.length > 0) {
+        console.log('Loaded', allData.length, 'items from main endpoint'); // Debug log
+        return; // If we got data from main endpoint, we're done
+      }
 
-      // Fetch data from all regions to build comprehensive search
+      // Fallback: fetch from individual regions if main endpoint doesn't work
+      const allTourismPlaces = [];
       for (const region of regions.slice(0, 10)) {
-        // Limit to first 10 regions to avoid too many requests
         try {
           const response = await fetch(`${apiWisataUrl}/daerah/${region.id}`, {
             headers: {
@@ -304,7 +334,10 @@ const App = () => {
         }
       }
 
-      setAllTourismData(allTourismPlaces);
+      if (allTourismPlaces.length > 0) {
+        setAllTourismData(allTourismPlaces);
+        console.log('Loaded', allTourismPlaces.length, 'items from regions'); // Debug log
+      }
     } catch (err) {
       console.error('Error loading additional data for search:', err);
     }
@@ -317,11 +350,17 @@ const App = () => {
     }
   }, [regions]);
 
+  // Re-run search when allTourismData is updated and there's an active search term
+  useEffect(() => {
+    if (searchTerm && allTourismData.length > 0) {
+      console.log('Re-running search due to data update'); // Debug log
+      searchAllTourismData(searchTerm);
+    }
+  }, [allTourismData, regions, provinces]); // Include regions and provinces as dependencies
+
   // Filter tourism data based on search term for selected region
   const filteredTourismData = tourismData.filter(
-    (place) =>
-      place.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      place.alamat.toLowerCase().includes(searchTerm.toLowerCase())
+    (place) => place.nama.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Render Add Tourism Form
