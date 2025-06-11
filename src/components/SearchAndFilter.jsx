@@ -1,6 +1,6 @@
-import React from 'react';
-import { Search, Filter } from 'lucide-react';
-import SearchableDropdown from './SearchableDropdown';
+import React from "react";
+import { Search, Filter } from "lucide-react";
+import SearchableDropdown from "./SearchableDropdown";
 
 const SearchAndFilter = ({
   searchTerm,
@@ -44,9 +44,20 @@ const SearchAndFilter = ({
               placeholder="Ketik nama destinasi wisata (contoh: Candi Borobudur, Pantai Malang Selatan...)"
             />
           </div>
-          <div className="flex items-center mt-3 text-sm text-gray-600">
-            <span className="bg-blue-50 px-3 py-1 rounded-full mr-2">💡 Tips:</span>
-            <span>Pencarian hanya berdasarkan nama destinasi wisata saja</span>
+          <div className="flex items-start mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100 shadow-sm">
+            <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full mr-3 flex-shrink-0">
+              <span className="text-blue-600 text-lg">💡</span>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-blue-800 mb-1">
+                Tips Pencarian:
+              </h4>
+              <p className="text-sm text-blue-700 leading-relaxed">
+                Gunakan kotak pencarian di atas untuk mencari destinasi wisata
+                secara langsung, atau pilih provinsi dan daerah untuk
+                menjelajahi destinasi wisata yang tersedia.
+              </p>
+            </div>
           </div>
 
           {/* Enhanced Search Results Dropdown */}
@@ -57,20 +68,21 @@ const SearchAndFilter = ({
                   <div>
                     <p className="font-bold text-gray-800 flex items-center gap-2">
                       <span className="text-xl">🎯</span>
-                      Hasil Pencarian ({searchResults.length} destinasi ditemukan)
+                      Hasil Pencarian ({searchResults.length} destinasi
+                      ditemukan)
                     </p>
                     <p className="text-sm text-gray-600 mt-1">
-                      {isDeleteMode 
-                        ? 'Pilih destinasi untuk dihapus atau lihat semua hasil di bawah'
-                        : 'Pilih destinasi untuk melihat lokasinya atau lihat semua hasil di bawah'
-                      }
+                      {isDeleteMode
+                        ? "Pilih destinasi untuk dihapus atau lihat semua hasil di bawah"
+                        : "Pilih destinasi untuk melihat lokasinya atau lihat semua hasil di bawah"}
                     </p>
                   </div>
                 </div>
               </div>
               {searchResults.slice(0, 5).map((place) => {
                 const region = regions.find((r) => r.id === place.id_daerah);
-                const province = region && provinces.find((p) => p.id === region.id_provinsi);
+                const province =
+                  region && provinces.find((p) => p.id === region.id_provinsi);
 
                 return (
                   <div
@@ -87,7 +99,8 @@ const SearchAndFilter = ({
                         <div className="flex items-center text-sm text-blue-700 mb-1">
                           <span className="mr-2">📍</span>
                           <span className="font-medium">
-                            {region?.nama_daerah || 'Unknown'}, {province?.nama_provinsi || 'Unknown'}
+                            {region?.nama_daerah || "Unknown"},{" "}
+                            {province?.nama_provinsi || "Unknown"}
                           </span>
                         </div>
                         <div className="flex items-center text-sm text-gray-600">
@@ -97,7 +110,9 @@ const SearchAndFilter = ({
                       </div>
                       <div className="flex items-center ml-3 bg-yellow-100 px-3 py-1 rounded-full">
                         <span className="text-yellow-500 mr-1">⭐</span>
-                        <span className="font-semibold text-gray-700">{place.rating}</span>
+                        <span className="font-semibold text-gray-700">
+                          {place.rating}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -106,7 +121,11 @@ const SearchAndFilter = ({
               {searchResults.length > 5 && (
                 <div className="p-4 text-center bg-gradient-to-r from-gray-50 to-blue-50">
                   <p className="text-sm text-gray-600 font-medium">
-                    🎯 Dan <span className="font-bold text-blue-600">{searchResults.length - 5}</span> destinasi lainnya...
+                    🎯 Dan{" "}
+                    <span className="font-bold text-blue-600">
+                      {searchResults.length - 5}
+                    </span>{" "}
+                    destinasi lainnya...
                   </p>
                   <p className="text-xs text-blue-600 mt-1">
                     Lihat semua hasil di bagian bawah halaman
@@ -121,10 +140,12 @@ const SearchAndFilter = ({
             <div className="absolute z-50 w-full mt-2 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-xl shadow-2xl p-6 text-center">
               <div className="text-4xl mb-3">🔍</div>
               <p className="text-gray-700 font-medium">
-                Tidak ada destinasi wisata yang ditemukan untuk "<span className="font-bold text-blue-600">{searchTerm}</span>"
+                Tidak ada destinasi wisata yang ditemukan untuk "
+                <span className="font-bold text-blue-600">{searchTerm}</span>"
               </p>
               <p className="text-sm text-gray-500 mt-2">
-                Coba gunakan kata kunci yang berbeda atau periksa ejaan nama destinasi
+                Coba gunakan kata kunci yang berbeda atau periksa ejaan nama
+                destinasi
               </p>
             </div>
           )}
@@ -140,7 +161,7 @@ const SearchAndFilter = ({
               🎯 Filter Berdasarkan Lokasi
             </h3>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl">
               <SearchableDropdown
@@ -148,7 +169,9 @@ const SearchAndFilter = ({
                 value={selectedProvinsi}
                 onChange={onProvinsiChange}
                 placeholder={isDeleteMode ? "Semua Provinsi" : "Pilih Provinsi"}
-                label={isDeleteMode ? "🗺️ Filter Provinsi (Opsional)" : "🗺️ Provinsi"}
+                label={
+                  isDeleteMode ? "🗺️ Filter Provinsi (Opsional)" : "🗺️ Provinsi"
+                }
                 searchKey="nama_provinsi"
               />
             </div>
@@ -160,10 +183,16 @@ const SearchAndFilter = ({
                 onChange={onDaerahChange}
                 placeholder={
                   selectedProvinsi
-                    ? isDeleteMode ? 'Semua Daerah/Kota' : 'Pilih Daerah/Kota'
-                    : 'Pilih Provinsi terlebih dahulu'
+                    ? isDeleteMode
+                      ? "Semua Daerah/Kota"
+                      : "Pilih Daerah/Kota"
+                    : "Pilih Provinsi terlebih dahulu"
                 }
-                label={isDeleteMode ? "🏙️ Filter Daerah/Kota (Opsional)" : "🏙️ Daerah/Kota"}
+                label={
+                  isDeleteMode
+                    ? "🏙️ Filter Daerah/Kota (Opsional)"
+                    : "🏙️ Daerah/Kota"
+                }
                 searchKey="nama_daerah"
                 disabled={!selectedProvinsi}
               />
@@ -199,12 +228,21 @@ const SearchAndFilter = ({
                   )}
                   {selectedProvinsi && (
                     <span className="bg-green-200 text-green-800 px-3 py-1 rounded-full font-medium">
-                      🗺️ {provinces.find(p => p.id === parseInt(selectedProvinsi))?.nama_provinsi}
+                      🗺️{" "}
+                      {
+                        provinces.find(
+                          (p) => p.id === parseInt(selectedProvinsi),
+                        )?.nama_provinsi
+                      }
                     </span>
                   )}
                   {selectedDaerah && (
                     <span className="bg-purple-200 text-purple-800 px-3 py-1 rounded-full font-medium">
-                      🏙️ {regions.find(r => r.id === parseInt(selectedDaerah))?.nama_daerah}
+                      🏙️{" "}
+                      {
+                        regions.find((r) => r.id === parseInt(selectedDaerah))
+                          ?.nama_daerah
+                      }
                     </span>
                   )}
                 </div>

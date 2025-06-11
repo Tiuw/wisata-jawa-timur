@@ -1,7 +1,7 @@
-import React from 'react';
-import NavigationBar from './NavigationBar';
-import SearchAndFilter from './SearchAndFilter';
-import TourismGrid from './TourismGrid';
+import React from "react";
+import NavigationBar from "./NavigationBar";
+import SearchAndFilter from "./SearchAndFilter";
+import TourismGrid from "./TourismGrid";
 
 const MainView = ({
   searchTerm,
@@ -26,12 +26,12 @@ const MainView = ({
 }) => {
   const getRegionName = (id_daerah) => {
     const region = regions.find((r) => r.id === id_daerah);
-    return region ? region.nama_daerah : 'Unknown';
+    return region ? region.nama_daerah : "Unknown";
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white to-blue-50 font-sans text-gray-800 p-6">
-      <NavigationBar 
+      <NavigationBar
         onAddTourism={onAddTourism}
         onDeleteTourism={onDeleteTourism}
       />
@@ -123,7 +123,7 @@ const MainView = ({
             <h2 className="text-2xl font-semibold mb-6 text-center">
               Destinasi di {getRegionName(parseInt(selectedDaerah))}
               <span className="text-lg text-gray-600">
-                {' '}
+                {" "}
                 (Filter: "{searchTerm}")
               </span>
             </h2>
@@ -136,7 +136,7 @@ const MainView = ({
             ) : filteredTourismData.length > 0 ? (
               <div>
                 <div className="mb-4 text-center text-sm text-gray-600">
-                  Menampilkan {filteredTourismData.length} dari{' '}
+                  Menampilkan {filteredTourismData.length} dari{" "}
                   {tourismData.length} destinasi di wilayah ini
                 </div>
                 <TourismGrid
@@ -170,22 +170,6 @@ const MainView = ({
                 <br />
                 Coba gunakan kata kunci yang berbeda atau jelajahi berdasarkan
                 provinsi dan daerah.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Default Welcome Message */}
-        {!selectedDaerah && !searchTerm && (
-          <div className="text-center py-12">
-            <div className="bg-white rounded-lg shadow-md p-8">
-              <h3 className="text-xl font-semibold mb-4 text-gray-700">
-                Selamat Datang di Portal Wisata Jawa Timur
-              </h3>
-              <p className="text-gray-600">
-                Gunakan kotak pencarian di atas untuk mencari destinasi wisata
-                secara langsung, atau pilih provinsi dan daerah untuk
-                menjelajahi destinasi wisata yang tersedia.
               </p>
             </div>
           </div>
